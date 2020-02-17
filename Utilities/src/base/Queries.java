@@ -5,6 +5,7 @@ import java.lang.reflect.InvocationTargetException;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
+import java.time.LocalDateTime;
 import java.util.Arrays;
 
 /**
@@ -254,7 +255,8 @@ public class Queries {
 		ResultSet res;
 		Object result = null;
 
-		String conditions = "";
+		String pkConditions = "";
+		String fkConditions = "";
 
 		Class classType = obj.getClass();
 
@@ -284,19 +286,19 @@ public class Queries {
 		for (Field f : fields) {
 
 			if (f.getName().equals(PK_NAME)) {
-				conditions += f.getName() + " = ?";
+				pkConditions += f.getName() + " = ?";
 			}
 
 			if (f.getName().equals(SECOND_KEY)) {
-				conditions += " AND " + f.getName() + " = ?";
+				fkConditions += " AND " + f.getName() + " = ?";
 			}
 
 		}
 
 		// Ejecutamos la sentencia con los valores buscados
 		try {
-			st = conn.devolverConexion().prepareStatement(
-					START_SELECT + SCHEMA_NAME + tableName + conditions + QUERY_ORDER + PK_NAME + QUERY_LIMIT);
+			st = conn.devolverConexion().prepareStatement(START_SELECT + SCHEMA_NAME + tableName + pkConditions
+					+ fkConditions + QUERY_ORDER + PK_NAME + QUERY_LIMIT);
 
 			for (Field f : fields) {
 
@@ -384,12 +386,17 @@ public class Queries {
 			}
 
 			if (f.getName().equals(SECOND_KEY)) {
-				pk_condition = pk_condition.replaceAll(">", "=");
+				System.out.println("AAAAH");
+				pk_condition = pk_condition.substring(0, pk_condition.length() - 3) + "= ?";
+				System.out.println(pk_condition);
 				fk_condition += " AND " + f.getName() + " > ?";
 			}
 
 		}
 
+		System.out.println(START_SELECT + SCHEMA_NAME + tableName + pk_condition
+					+ fk_condition + QUERY_ORDER + PK_NAME + QUERY_LIMIT);
+		
 		// Ejecutamos la sentencia con los valores buscados
 
 		try {
@@ -451,7 +458,7 @@ public class Queries {
 	 */
 	public static Object findValue(Field f, Object obj) throws IllegalArgumentException, IllegalAccessException {
 		Object value;
-		switch (f.getType().getName()) {
+		switch (f.getType().getCanonicalName()) {
 
 		case "java.lang.String": {
 			value = (String) f.get(obj);
@@ -498,6 +505,17 @@ public class Queries {
 			break;
 		}
 
+		// TODO: Posibilidad de fallo
+		case "java.time.LocalDateTime": {
+			value = (LocalDateTime) f.get(obj);
+			break;
+		}
+
+		case "byte[]": {
+			value = (byte[]) f.get(obj);
+			break;
+		}
+
 		default: {
 			value = null;
 			break;
@@ -520,7 +538,7 @@ public class Queries {
 
 		Class value = null;
 
-		switch (f.getType().getName()) {
+		switch (f.getType().getCanonicalName()) {
 
 		case "java.lang.String": {
 			value = String.class;
@@ -564,6 +582,16 @@ public class Queries {
 
 		case "boolean": {
 			value = Boolean.class;
+			break;
+		}
+
+		case "java.time.LocalDateTime": {
+			value = LocalDateTime.class;
+			break;
+		}
+
+		case "byte[]": {
+			value = byte[].class;
 			break;
 		}
 

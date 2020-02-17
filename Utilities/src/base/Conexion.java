@@ -1,6 +1,5 @@
 package base;
 
-
 import java.sql.Connection;
 import java.sql.DriverManager;
 import java.sql.SQLException;
@@ -39,7 +38,6 @@ public class Conexion {
 		}
 	}
 
-	@SuppressWarnings("deprecation")
 	@Override
 	protected void finalize() throws Throwable {
 		cerrarConexion();

@@ -4,31 +4,25 @@ package base;
  * 
  */
 
-import java.sql.Connection;
+import java.sql.PreparedStatement;
+import java.sql.ResultSet;
+import java.sql.SQLException;
 
 /**
  * @author usuario
  * @version 1.0
- * @deprecated
+ * 
  */
 public interface DBInjectable {
 
-	@Deprecated
-	public boolean insert(Connection conn);
+	public default boolean noResultQuery(PreparedStatement st) throws SQLException {
+		return !st.execute();
+	}
 
-	@Deprecated
-	public boolean update(Connection conn);
-
-	@Deprecated
-	public boolean delete(Connection conn);
-
-	@Deprecated
-	public boolean selectOne(Connection conn);
-
-	@Deprecated
-	public boolean selectNext(Connection conn);
-
-	@Deprecated
-	public boolean getAuth(Connection conn);
+	public default ResultSet resultQUery(PreparedStatement st) throws SQLException {
+		return st.executeQuery();
+	}
+	
+	
 
 }
